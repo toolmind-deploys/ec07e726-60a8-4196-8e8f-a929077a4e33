@@ -8,7 +8,7 @@ const fsdb = firestore();
 export async function GET() {
   try {
     const dashboardRef = fsdb.collection('dashboard_items');
-    const snapshot = await dashboardRef.get();
+    const snapshot = await dashboardRef.orderBy('createdAt', 'desc').get();
     
     const items = snapshot.docs.map(doc => ({
       id: doc.id,
