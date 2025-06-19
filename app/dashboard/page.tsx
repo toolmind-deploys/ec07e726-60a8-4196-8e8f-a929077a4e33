@@ -28,6 +28,8 @@ function formatDate(timestamp: any) {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   });
 }
 
@@ -63,23 +65,26 @@ export default async function DashboardPage() {
     <div className='p-6'>
       <div className='flex justify-between items-center mb-6'>
         <h1 className='text-3xl font-bold'>Dashboard</h1>
+        <p className='text-sm text-muted-foreground'>
+          Total Items: {data.items?.length || 0}
+        </p>
       </div>
 
       <div className='rounded-md border'>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created At</TableHead>
+              <TableHead className='w-[200px]'>Title</TableHead>
+              <TableHead className='w-[400px]'>Description</TableHead>
+              <TableHead className='w-[100px]'>Status</TableHead>
+              <TableHead className='w-[200px]'>Created At</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.items?.map((item: any) => (
               <TableRow key={item.id}>
                 <TableCell className='font-medium'>{item.title}</TableCell>
-                <TableCell>{item.description}</TableCell>
+                <TableCell className='truncate max-w-[400px]'>{item.description}</TableCell>
                 <TableCell>
                   <StatusBadge status={item.status} />
                 </TableCell>
@@ -88,7 +93,7 @@ export default async function DashboardPage() {
             ))}
             {(!data.items || data.items.length === 0) && (
               <TableRow>
-                <TableCell colSpan={4} className='text-center text-muted-foreground'>
+                <TableCell colSpan={4} className='text-center h-24 text-muted-foreground'>
                   No items found
                 </TableCell>
               </TableRow>
