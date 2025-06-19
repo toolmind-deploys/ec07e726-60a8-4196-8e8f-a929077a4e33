@@ -1,6 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 async function getDashboardData() {
   try {
@@ -13,13 +21,38 @@ async function getDashboardData() {
   }
 }
 
+function formatDate(timestamp: any) {
+  if (!timestamp) return '';
+  const date = timestamp._seconds ? new Date(timestamp._seconds * 1000) : new Date(timestamp);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const variants: Record<string, string> = {
+    completed: 'bg-green-100 text-green-800',
+    'in-progress': 'bg-blue-100 text-blue-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    default: 'bg-gray-100 text-gray-800'
+  };
+
+  return (
+    <Badge variant='secondary' className={variants[status] || variants.default}>
+      {status}
+    </Badge>
+  );
+}
+
 export default async function DashboardPage() {
   const data = await getDashboardData();
 
   if (data.error) {
     return (
-      <Alert variant="destructive">
-        <ExclamationTriangleIcon className="h-4 w-4" />
+      <Alert variant='destructive'>
+        <ExclamationTriangleIcon className='h-4 w-4' />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>{data.error}</AlertDescription>
       </Alert>
@@ -27,38 +60,42 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.items?.map((item: any) => (
-          <Card key={item.id}>
-            <CardHeader>
-              <CardTitle>{item.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600">{item.description}</p>
-              {item.status && (
-                <div className="mt-4">
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    item.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    item.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {item.status}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+    <div className='p-6'>
+      <div className='flex justify-between items-center mb-6'>
+        <h1 className='text-3xl font-bold'>Dashboard</h1>
       </div>
-      
-      {(!data.items || data.items.length === 0) && (
-        <div className="text-center py-10">
-          <p className="text-gray-500">No items found</p>
-        </div>
-      )}
+
+      <div className='rounded-md border'>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created At</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.items?.map((item: any) => (
+              <TableRow key={item.id}>
+                <TableCell className='font-medium'>{item.title}</TableCell>
+                <TableCell>{item.description}</TableCell>
+                <TableCell>
+                  <StatusBadge status={item.status} />
+                </TableCell>
+                <TableCell>{formatDate(item.createdAt)}</TableCell>
+              </TableRow>
+            ))}
+            {(!data.items || data.items.length === 0) && (
+              <TableRow>
+                <TableCell colSpan={4} className='text-center text-muted-foreground'>
+                  No items found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
